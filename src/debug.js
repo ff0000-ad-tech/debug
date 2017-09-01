@@ -18,12 +18,13 @@ exports.humanize = require('ms');
  */
 exports.instances = [];
 
-/**
- * The currently active debug mode names, and names to skip.
- */
 
-exports.names = [];
-exports.skips = [];
+
+/**
+ * Namespace patterns to output
+ */
+exports.includes = [];
+exports.excludes = [];
 
 /**
  * Map of special "%n" handling functions, for the debug "format" argument.
@@ -131,7 +132,7 @@ function createDebug(namespace) {
   return debug;
 }
 
-function destroy () {
+function destroy() {
   var index = exports.instances.indexOf(this);
   if (index !== -1) {
     exports.instances.splice(index, 1);
@@ -141,75 +142,124 @@ function destroy () {
   }
 }
 
+
 /**
- * Enables a debug mode by namespaces. This can include modes
- * separated by a colon and wildcards.
+ * Enables a debug mode by regular expression. 
  *
- * @param {String} namespaces
+ * @param {RegExp} namespaces
  * @api public
  */
+function enable(pattern) {
+  pattern = validate(pattern);
 
-function enable(namespaces) {
-  exports.save(namespaces);
-
-  exports.names = [];
-  exports.skips = [];
-
-  var i;
-  var split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-  var len = split.length;
-
-  for (i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
-    namespaces = split[i].replace(/\*/g, '.*?');
-    if (namespaces[0] === '-') {
-      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-    } else {
-      exports.names.push(new RegExp('^' + namespaces + '$'));
-    }
+  const included = hasPattern(exports.includes, pattern);
+  if (included === undefined) {
+    exports.includes.push(pattern);
+  }
+  const excluded = hasPattern(exports.excludes, pattern);
+  if (excluded !== undefined) {
+    exports.excludes.splice(excluded, 1);
   }
 
+  updateEnabled();
+}
+
+
+/**
+ * Disables a debug mode by regular expression. 
+ *
+ * @param {RegExp} namespaces
+ * @api public
+ */
+function disable(pattern) {
+  pattern = validate(pattern);
+
+  const included = hasPattern(exports.includes, pattern);
+  if (included !== undefined) {
+    exports.excludes.splice(excluded, 1);
+  }
+  const excluded = hasPattern(exports.excludes, pattern);
+  if (excluded === undefined) {
+    exports.includes.push(pattern);
+  }
+
+  updateEnabled();
+}
+
+
+function validate(pattern) {
+  // pattern is a boolean or undefined
+  if (pattern === true || pattern === undefined) {
+    return new RegExp('.*?');
+  }
+  // pattern is a string
+  else if (!(pattern instanceof RegExp)) {
+    return new RegExp(pattern.replace(/\*/g, '.*?'));
+  }
+  return pattern;
+}
+
+function hasPattern(patterns, pattern) {
+  for (var i in patterns) {
+    if (String(patterns[i]) === String(pattern)) {
+      return i;
+    }
+  }
+}
+
+
+/**
+ * Updates all instances enabled/disabled.
+ *
+ * @api private
+ */
+function updateEnabled() {
   for (i = 0; i < exports.instances.length; i++) {
     var instance = exports.instances[i];
     instance.enabled = exports.enabled(instance.namespace);
-  }
+  }  
 }
 
-/**
- * Disable debug output.
- *
- * @api public
- */
 
-function disable() {
-  exports.enable('');
-}
+
 
 /**
  * Returns true if the given mode name is enabled, false otherwise.
  *
- * @param {String} name
+ * @param {String} namespace
  * @return {Boolean}
  * @api public
  */
+function enabled(namespace) {
+  var isIncluded = false;
+  console.log(exports.includes)
+  for (var i in exports.includes) {
+    console.log(exports.includes[i])
+    if (exports.includes[i].test(namespace)) {
+      isIncluded = true;
+      break;
+    }
+  }
 
-function enabled(name) {
-  if (name[name.length - 1] === '*') {
+  var isExcluded = false;
+  for (var j in exports.excludes) {
+    if (exports.excludes[j].test(namespace)) {
+      isExcluded = true;
+      break;
+    }
+  }
+
+  if (isIncluded && !isExcluded) {
     return true;
   }
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
-    if (exports.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (i = 0, len = exports.names.length; i < len; i++) {
-    if (exports.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
 }
+
+
+
+
+
+
+
 
 /**
  * Coerce `val`.
@@ -218,7 +268,6 @@ function enabled(name) {
  * @return {Mixed}
  * @api private
  */
-
 function coerce(val) {
   if (val instanceof Error) return val.stack || val.message;
   return val;
