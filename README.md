@@ -15,6 +15,27 @@ $ npm install debug
 
 ## Usage
 
+
+#### UPDATE 9/1/2017 by @gmcdev
+This module has been changed to allow the use of RegExp.
+You can now:
+```
+debug.enable(/pattern/);
+debug.disable(/another-pattern/);
+```
+This is necessary when you have complicated namespaces and want to filter very granularly, like:
+```
+// enable "*" (which is still supported for legacy implementations)
+debug.enable(true); 
+
+// then exclude all "info" output
+debug.disable(/info.*/);
+
+// then include a single namespace of info
+debug.enable(/info:module1:.*/);
+```
+
+
 `debug` exposes a function; simply pass this function the name of your module, and it will return a decorated version of `console.error` for you to pass debug statements to. This will allow you to toggle the debug output for different parts of your module as well as the module as a whole.
 
 Example [_app.js_](./examples/node/app.js):
