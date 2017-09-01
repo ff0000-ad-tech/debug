@@ -177,11 +177,11 @@ function disable(pattern) {
 
   const included = hasPattern(exports.includes, pattern);
   if (included !== undefined) {
-    exports.excludes.splice(excluded, 1);
+    exports.includes.splice(included, 1);
   }
   const excluded = hasPattern(exports.excludes, pattern);
   if (excluded === undefined) {
-    exports.includes.push(pattern);
+    exports.excludes.push(pattern);
   }
 
   updateEnabled();
