@@ -1,3 +1,4 @@
+const escapeStringRegexp = require('escape-string-regexp');
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -144,9 +145,9 @@ function destroy() {
 
 
 /**
- * Enables a debug mode by regular expression. 
+ * Enables a debug mode by regular expression or string. 
  *
- * @param {RegExp} namespaces
+ * @param {RegExp|String} namespaces
  * @api public
  */
 function enable(pattern) {
@@ -166,9 +167,9 @@ function enable(pattern) {
 
 
 /**
- * Disables a debug mode by regular expression. 
+ * Disables a debug mode by regular expression or string. 
  *
- * @param {RegExp} namespaces
+ * @param {RegExp|String} namespaces
  * @api public
  */
 function disable(pattern) {
@@ -194,7 +195,7 @@ function validate(pattern) {
   }
   // pattern is a string
   else if (!(pattern instanceof RegExp)) {
-    return new RegExp(pattern.replace(/\*/g, '.*?'));
+    return new RegExp(escapeStringRegexp(pattern));
   }
   return pattern;
 }
@@ -232,9 +233,7 @@ function updateEnabled() {
  */
 function enabled(namespace) {
   var isIncluded = false;
-  console.log(exports.includes)
   for (var i in exports.includes) {
-    console.log(exports.includes[i])
     if (exports.includes[i].test(namespace)) {
       isIncluded = true;
       break;

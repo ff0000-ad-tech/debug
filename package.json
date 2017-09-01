@@ -18,6 +18,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "escape-string-regexp": "^1.0.5",
     "ms": "2.0.0"
   },
   "devDependencies": {
@@ -39,6 +40,9 @@
     "sinon-chai": "^2.8.0"
   },
   "main": "./src/index.js",
+  "scripts": {
+    "tests": "mocha test/debug_spec.js"
+  },
   "browser": "./src/browser.js",
   "component": {
     "scripts": {
