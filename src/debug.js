@@ -193,6 +193,10 @@ function validate(pattern) {
   if (pattern === true || pattern === undefined) {
     return new RegExp('.*?');
   }
+  // pattern has legacy "*" wildcards
+  else if(pattern.match(/\*/)) {
+    pattern = new RegExp(pattern.replace(/\*/g, '.*?'));
+  }
   // pattern is a string
   else if (!(pattern instanceof RegExp)) {
     return new RegExp(escapeStringRegexp(pattern));
