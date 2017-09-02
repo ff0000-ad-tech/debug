@@ -252,7 +252,7 @@ function conform(pattern) {
   var patterns = [];
 
   // pattern is a list, recurse items
-  if (pattern.constructor === Array) {
+  if (pattern instanceof Array) {
     for (var i in pattern) {
       patterns = patterns.concat(
         conform(pattern[i])
@@ -276,9 +276,9 @@ function conform(pattern) {
     const ns = pattern.split(/[\s,]+/);
     // recurse multiple comma/space separated namespaces
     if (ns.length > 1) {
-      for (var j in args) {
+      for (var j in ns) {
         patterns = patterns.concat(
-          conform(args[j])
+          conform(ns[j])
         );
       }
     }
