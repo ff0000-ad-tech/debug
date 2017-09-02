@@ -249,7 +249,7 @@ function enabled(namespace) {
  * @api private
  */
 function conform(pattern) {
-  var debug = false;
+  var debug = true;
   if (debug) console.log('>>', pattern);
 
   var patterns = [];
@@ -287,11 +287,21 @@ function conform(pattern) {
     }
     // single namespace
     else {
-      // support for legacy "*" wildcards
-      if(pattern.match(/\*/)) {
+      // support for string regex, like: '/test:.*/', convert to regex
+      if (pattern.match(/^\/.*\/$/)) {
+        patterns.push(
+          new RegExp(pattern.slice(1, -1))
+        );        
+      }
+      // support for wildcard strings "*", replace with appropriate regex
+      else if (pattern.match(/\*/)) {
         patterns = patterns.concat(
           new RegExp(pattern.replace(/\*/g, '.*?'))
         );
+      }
+      // support for exclusion strings starting with "-", send to disable
+      else if (pattern.match(/^-/)) {
+        disable(pattern.slice(1));
       }
       // normal string, escape for regex
       else {

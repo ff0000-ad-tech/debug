@@ -58,17 +58,25 @@ describe('debug', function () {
       expect(debug.enable('test:module1')).to.not.throw;
       expect(debug.disable('test:module1')).to.not.throw;
     });
-    it('can be a string with wildcards', function() {
+    it('can be a string regex', function() {
+      expect(debug.enable('/test:.*/')).to.not.throw;
+      expect(debug.disable('/test:.*/')).to.not.throw;
+    });
+    it('can be a string with wildcards "*"', function() {
       expect(debug.enable('test:*')).to.not.throw;
       expect(debug.disable('test:*')).to.not.throw;
+    });
+    it('can be a string with exclusion character "-"', function() {
+      expect(debug.enable('-test:module1')).to.not.throw;
+      expect(debug.disable('-test:module1')).to.not.throw;
     });
     it('can be a comma/space separated string', function() {
       expect(debug.enable('test, test:module1')).to.not.throw;
       expect(debug.disable('test, test:module1')).to.not.throw;
     });
-    it('can be a comma/space separated string with wildcards', function() {
-      expect(debug.enable('test, test:*')).to.not.throw;
-      expect(debug.disable('test, test:*')).to.not.throw;
+    it('can be a comma/space separated string with wildcards or exclusions', function() {
+      expect(debug.enable('test, test:*, -test.module1')).to.not.throw;
+      expect(debug.disable('test, test:*, -test.module1')).to.not.throw;
     });
     it('can be a list of mixed types', function() {
       expect(debug.enable(['module1', new RegExp('module2')])).to.not.throw;
