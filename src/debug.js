@@ -249,37 +249,57 @@ function enabled(namespace) {
  * @api private
  */
 function conform(pattern) {
-  // pattern is boolean or undefined
-  if (typeof pattern === 'boolean' || pattern === undefined) {
-    return [new RegExp('.*?')];
+  var patterns = [];
+
+  // pattern is a list, recurse items
+  if (pattern.constructor === Array) {
+    for (var i in pattern) {
+      patterns = patterns.concat(
+        conform(pattern[i])
+      );
+    }
   }
-  // pattern has legacy "*" wildcards
-  else if(pattern.match(/\*/)) {
-    return [new RegExp(pattern.replace(/\*/g, '.*?'))];
+  // pattern is boolean or undefined, assume all
+  else if (typeof pattern === 'boolean' || pattern === undefined) {
+    patterns = patterns.push(
+      new RegExp('.*?')
+    );
   }
-  // pattern is a string, possibly with comma/space separated namespaces
-  else if (!(pattern instanceof RegExp)) {
-    var patterns = [];
-    const namespaces = pattern.split(/[\s,]+/);
-    if (namespaces.length > 1) {
-      for (var i in args) {
+  // pattern is a regular expression, concat
+  else if (pattern instanceof RegExp) {
+    patterns.push(
+      pattern
+    );
+  }
+  // pattern is a string
+  else {
+    const ns = pattern.split(/[\s,]+/);
+    // recurse multiple comma/space separated namespaces
+    if (ns.length > 1) {
+      for (var j in args) {
         patterns = patterns.concat(
-          conform(args[i])
+          conform(args[j])
         );
       }
     }
+    // single namespace
     else {
-      patterns.push(pattern);
+      // support for legacy "*" wildcards
+      if(pattern.match(/\*/)) {
+        patterns = patterns.concat(
+          new RegExp(pattern.replace(/\*/g, '.*?'))
+        );
+      }
+      // normal string, escape for regex
+      else {
+        patterns.concat(
+          new RegExp(escapeStringRegexp(ns[0]))
+        );
+      }
     }
-    for (var j in patterns) {
-      patterns[j] = new RegExp(escapeStringRegexp(namespaces[0]));
-    }
-    return patterns;
   }
-  // pattern is ??
-  else {
-    throw new Error('Pattern should be a undefined, boolean, string, or RegExp');
-  }
+
+  return patterns;
 }
 
 
