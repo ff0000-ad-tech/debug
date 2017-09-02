@@ -76,37 +76,37 @@ describe('debug', function () {
     });
   });
 
-  context('with log function', function () {
+  // context('with log function', function () {
 
-    beforeEach(function () {
-      debug.enable('test');
-      log = debug('test');
-    });
+  //   beforeEach(function () {
+  //     debug.enable('test');
+  //     log = debug('test');
+  //   });
 
-    it('uses it', function () {
-      log.log = sinon.stub();
-      log('using custom log function');
+  //   it('uses it', function () {
+  //     log.log = sinon.stub();
+  //     log('using custom log function');
 
-      expect(log.log).to.have.been.calledOnce;
-    });
-  });
+  //     expect(log.log).to.have.been.calledOnce;
+  //   });
+  // });
 
-  describe('custom functions', function () {
-    var log;
+  // describe('custom functions', function () {
+  //   var log;
 
-    beforeEach(function () {
-      debug.enable('test');
-      log = debug('test');
-    });
+  //   beforeEach(function () {
+  //     debug.enable('test');
+  //     log = debug('test');
+  //   });
 
-    context('with log function', function () {
-      it('uses it', function () {
-        log.log = sinon.spy();
-        log('using custom log function');
+  //   context('with log function', function () {
+  //     it('uses it', function () {
+  //       log.log = sinon.spy();
+  //       log('using custom log function');
 
-        expect(log.log).to.have.been.calledOnce;
-      });
-    });
-  });
+  //       expect(log.log).to.have.been.calledOnce;
+  //     });
+  //   });
+  // });
 
 });

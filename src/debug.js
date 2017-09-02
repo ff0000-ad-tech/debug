@@ -249,6 +249,9 @@ function enabled(namespace) {
  * @api private
  */
 function conform(pattern) {
+  var debug = false;
+  if (debug) console.log('>>', pattern);
+
   var patterns = [];
 
   // pattern is a list, recurse items
@@ -261,7 +264,7 @@ function conform(pattern) {
   }
   // pattern is boolean or undefined, assume all
   else if (typeof pattern === 'boolean' || pattern === undefined) {
-    patterns = patterns.push(
+    patterns.push(
       new RegExp('.*?')
     );
   }
@@ -292,13 +295,13 @@ function conform(pattern) {
       }
       // normal string, escape for regex
       else {
-        patterns.concat(
+        patterns = patterns.concat(
           new RegExp(escapeStringRegexp(ns[0]))
         );
       }
     }
   }
-
+  if (debug) console.log('<<', patterns);
   return patterns;
 }
 
