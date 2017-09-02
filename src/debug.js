@@ -22,18 +22,22 @@ exports.instances = [];
 
 
 /**
- * Namespace patterns to output
+ * Namespace patterns to output or skip.
  */
 exports.includes = [];
 exports.excludes = [];
+
+
+
 
 /**
  * Map of special "%n" handling functions, for the debug "format" argument.
  *
  * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
  */
-
 exports.formatters = {};
+
+
 
 /**
  * Select a color.
@@ -41,7 +45,6 @@ exports.formatters = {};
  * @return {Number}
  * @api private
  */
-
 function selectColor(namespace) {
   var hash = 0, i;
 
@@ -53,6 +56,8 @@ function selectColor(namespace) {
   return exports.colors[Math.abs(hash) % exports.colors.length];
 }
 
+
+
 /**
  * Create a debugger with the given `namespace`.
  *
@@ -60,7 +65,6 @@ function selectColor(namespace) {
  * @return {Function}
  * @api public
  */
-
 function createDebug(namespace) {
 
   var prevTime;
@@ -145,13 +149,18 @@ function destroy() {
 
 
 /**
- * Enables a debug mode by regular expression or string. 
+ * Enables all namespaces, or namespaces by regular expression or string match. 
+ *  Wildcard strings('*') maintained for legacy applications.
  *
- * @param {RegExp|String} namespaces
+ * @param pattern 
+ *    {Boolean|'*'|undefined} all namespaces
+ *    {RegExp} namespaces that match this regex
+ *    {String|'*'} specific namespace, or comma-separated namespaces
+ *  
  * @api public
  */
 function enable(pattern) {
-  pattern = validate(pattern);
+  pattern = conform(pattern);
 
   const included = hasPattern(exports.includes, pattern);
   if (included === undefined) {
@@ -167,13 +176,18 @@ function enable(pattern) {
 
 
 /**
- * Disables a debug mode by regular expression or string. 
+ * Disables all namespaces, or namespaces by regular expression or string match. 
+ *  Wildcard strings('*') maintained for legacy applications.
  *
- * @param {RegExp|String} namespaces
+ * @param pattern 
+ *    {Boolean|'*'|undefined} all namespaces
+ *    {RegExp} namespaces that match this regex
+ *    {String|'*'} specific namespace, or comma-separated namespaces
+ *  
  * @api public
  */
 function disable(pattern) {
-  pattern = validate(pattern);
+  pattern = conform(pattern);
 
   const included = hasPattern(exports.includes, pattern);
   if (included !== undefined) {
@@ -188,9 +202,9 @@ function disable(pattern) {
 }
 
 
-function validate(pattern) {
-  // pattern is a boolean or undefined
-  if (pattern === true || pattern === undefined) {
+function conform(pattern) {
+  // pattern is boolean or undefined
+  if (typeof pattern === 'boolean' || pattern === undefined) {
     return new RegExp('.*?');
   }
   // pattern has legacy "*" wildcards
