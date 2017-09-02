@@ -137,6 +137,12 @@ function createDebug(namespace) {
   return debug;
 }
 
+
+/**
+ * Removes this instance from scope.
+ *
+ * @api public
+ */
 function destroy() {
   var index = exports.instances.indexOf(this);
   if (index !== -1) {
@@ -146,6 +152,7 @@ function destroy() {
     return false;
   }
 }
+
 
 
 /**
@@ -160,19 +167,21 @@ function destroy() {
  * @api public
  */
 function enable(pattern) {
-  pattern = conform(pattern);
+  const patterns = conform(pattern);
 
-  const included = hasPattern(exports.includes, pattern);
-  if (included === undefined) {
-    exports.includes.push(pattern);
+  for (var i in patterns) {
+    const included = hasPattern(exports.includes, patterns[i]);
+    if (included === undefined) {
+      exports.includes.push(patterns[i]);
+    }
+    const excluded = hasPattern(exports.excludes, patterns[i]);
+    if (excluded !== undefined) {
+      exports.excludes.splice(excluded, 1);
+    }
   }
-  const excluded = hasPattern(exports.excludes, pattern);
-  if (excluded !== undefined) {
-    exports.excludes.splice(excluded, 1);
-  }
-
   updateEnabled();
 }
+
 
 
 /**
@@ -187,58 +196,20 @@ function enable(pattern) {
  * @api public
  */
 function disable(pattern) {
-  pattern = conform(pattern);
+  const patterns = conform(pattern);
 
-  const included = hasPattern(exports.includes, pattern);
-  if (included !== undefined) {
-    exports.includes.splice(included, 1);
-  }
-  const excluded = hasPattern(exports.excludes, pattern);
-  if (excluded === undefined) {
-    exports.excludes.push(pattern);
-  }
-
-  updateEnabled();
-}
-
-
-function conform(pattern) {
-  // pattern is boolean or undefined
-  if (typeof pattern === 'boolean' || pattern === undefined) {
-    return new RegExp('.*?');
-  }
-  // pattern has legacy "*" wildcards
-  else if(pattern.match(/\*/)) {
-    pattern = new RegExp(pattern.replace(/\*/g, '.*?'));
-  }
-  // pattern is a string
-  else if (!(pattern instanceof RegExp)) {
-    return new RegExp(escapeStringRegexp(pattern));
-  }
-  return pattern;
-}
-
-function hasPattern(patterns, pattern) {
   for (var i in patterns) {
-    if (String(patterns[i]) === String(pattern)) {
-      return i;
+    const included = hasPattern(exports.includes, patterns[i]);
+    if (included !== undefined) {
+      exports.includes.splice(included, 1);
+    }
+    const excluded = hasPattern(exports.excludes, patterns[i]);
+    if (excluded === undefined) {
+      exports.excludes.push(patterns[i]);
     }
   }
+  updateEnabled();
 }
-
-
-/**
- * Updates all instances enabled/disabled.
- *
- * @api private
- */
-function updateEnabled() {
-  for (i = 0; i < exports.instances.length; i++) {
-    var instance = exports.instances[i];
-    instance.enabled = exports.enabled(instance.namespace);
-  }  
-}
-
 
 
 
@@ -257,7 +228,6 @@ function enabled(namespace) {
       break;
     }
   }
-
   var isExcluded = false;
   for (var j in exports.excludes) {
     if (exports.excludes[j].test(namespace)) {
@@ -265,7 +235,6 @@ function enabled(namespace) {
       break;
     }
   }
-
   if (isIncluded && !isExcluded) {
     return true;
   }
@@ -273,8 +242,74 @@ function enabled(namespace) {
 
 
 
+/**
+ * Conform a namespace argument
+ *
+ * @param {Mixed}
+ * @api private
+ */
+function conform(pattern) {
+  // pattern is boolean or undefined
+  if (typeof pattern === 'boolean' || pattern === undefined) {
+    return [new RegExp('.*?')];
+  }
+  // pattern has legacy "*" wildcards
+  else if(pattern.match(/\*/)) {
+    return [new RegExp(pattern.replace(/\*/g, '.*?'))];
+  }
+  // pattern is a string, possibly with comma/space separated namespaces
+  else if (!(pattern instanceof RegExp)) {
+    var patterns = [];
+    const namespaces = pattern.split(/[\s,]+/);
+    if (namespaces.length > 1) {
+      for (var i in args) {
+        patterns = patterns.concat(
+          conform(args[i])
+        );
+      }
+    }
+    else {
+      patterns.push(pattern);
+    }
+    for (var j in patterns) {
+      patterns[j] = new RegExp(escapeStringRegexp(namespaces[0]));
+    }
+    return patterns;
+  }
+  // pattern is ??
+  else {
+    throw new Error('Pattern should be a undefined, boolean, string, or RegExp');
+  }
+}
 
 
+/**
+ * Does array have a matching regex?
+ *
+ * @param {Array} list of patterns
+ * @param {RegExp} RegExp object to check against
+ * @api private
+ */
+function hasPattern(patterns, pattern) {
+  for (var i in patterns) {
+    if (String(patterns[i]) === String(pattern)) {
+      return i;
+    }
+  }
+}
+
+
+/**
+ * Sets all debug instaces with current enabled states.
+*
+ * @api private
+ */
+function updateEnabled() {
+  for (i = 0; i < exports.instances.length; i++) {
+    var instance = exports.instances[i];
+    instance.enabled = exports.enabled(instance.namespace);
+  }  
+}
 
 
 
