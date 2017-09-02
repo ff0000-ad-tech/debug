@@ -12,6 +12,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
+exports.reset = reset;
 exports.humanize = require('ms');
 
 /**
@@ -24,9 +25,11 @@ exports.instances = [];
 /**
  * Namespace patterns to output or skip.
  */
-exports.includes = [];
-exports.excludes = [];
-
+function reset() {
+  exports.includes = [];
+  exports.excludes = [];  
+}
+reset();
 
 
 
@@ -155,6 +158,7 @@ function destroy() {
 
 
 
+
 /**
  * Enables all namespaces, or namespaces by regular expression or string match. 
  *  Wildcard strings('*') maintained for legacy applications.
@@ -167,6 +171,9 @@ function destroy() {
  * @api public
  */
 function enable(pattern) {
+  if (typeof pattern === 'boolean' && pattern === false) {
+    return disable();
+  }
   const patterns = conform(pattern);
 
   for (var i in patterns) {
@@ -196,6 +203,9 @@ function enable(pattern) {
  * @api public
  */
 function disable(pattern) {
+  if (typeof pattern === 'boolean' && pattern === true) {
+    return enable();
+  }
   const patterns = conform(pattern);
 
   for (var i in patterns) {
@@ -221,22 +231,30 @@ function disable(pattern) {
  * @api public
  */
 function enabled(namespace) {
+  // console.log('\nenabled?');
+  // console.log(' includes:');
   var isIncluded = false;
   for (var i in exports.includes) {
     if (exports.includes[i].test(namespace)) {
+      // console.log(' -', namespace, 'included');
       isIncluded = true;
       break;
     }
   }
+  // console.log(' excludes:');
   var isExcluded = false;
   for (var j in exports.excludes) {
     if (exports.excludes[j].test(namespace)) {
+      // console.log(' -', namespace, 'excluded');
       isExcluded = true;
       break;
     }
   }
   if (isIncluded && !isExcluded) {
     return true;
+  }
+  else {
+    return false;
   }
 }
 
@@ -249,7 +267,7 @@ function enabled(namespace) {
  * @api private
  */
 function conform(pattern) {
-  var debug = true;
+  var debug = false;
   if (debug) console.log('>>', pattern);
 
   var patterns = [];
