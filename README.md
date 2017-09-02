@@ -15,27 +15,6 @@ $ npm install debug
 
 ## Usage
 
-
-#### UPDATE 9/1/2017 by @gmcdev
-This module has been changed to allow the use of RegExp.
-You can now:
-```
-debug.enable(/pattern/);
-debug.disable(/another-pattern/);
-```
-This is necessary when you have complicated namespaces and want to filter very granularly, like:
-```
-// enable "*" (which is still supported for legacy implementations)
-debug.enable(true); 
-
-// then exclude all "info" output
-debug.disable(/info.*/);
-
-// then include a single namespace of info
-debug.enable(/info:module1:.*/);
-```
-
-
 `debug` exposes a function; simply pass this function the name of your module, and it will return a decorated version of `console.error` for you to pass debug statements to. This will allow you to toggle the debug output for different parts of your module as well as the module as a whole.
 
 Example [_app.js_](./examples/node/app.js):
@@ -148,6 +127,26 @@ When stdout is not a TTY, `Date#toISOString()` is used, making it more useful fo
 If you're using this in one or more of your libraries, you _should_ use the name of your library so that developers may toggle debugging as desired without guessing names. If you have more than one debuggers you _should_ prefix them with your library name and use ":" to separate features. For example "bodyParser" from Connect would then be "connect:bodyParser".  If you append a "*" to the end of your name, it will always be enabled regardless of the setting of the DEBUG environment variable.  You can then use it for normal output as well as debug output.
 
 ## Wildcards
+
+#### UPDATE 9/1/2017
+This module has been changed to allow the use of RegExp.
+You can now:
+```js
+debug.enable(/pattern/);
+debug.disable(/another-pattern/);
+```
+
+This is necessary when you have complicated namespaces and want to filter very granularly, like:
+```js
+// enable "*" (which is still supported for legacy implementations)
+debug.enable(true); 
+
+// then exclude all "info" output
+debug.disable(/info.*/);
+
+// then include a single namespace of info
+debug.enable(/info:module1:.*/);
+```
 
 The `*` character may be used as a wildcard. Suppose for example your library has
 debuggers named "connect:bodyParser", "connect:compress", "connect:session",
