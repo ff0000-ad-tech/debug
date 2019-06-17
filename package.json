@@ -8,8 +8,6 @@
 	"main": "./src/index.js",
 	"scripts": {
 		"tests": "mocha test/debug_spec.js",
-		"server": "NODE_ENV=development DEBUG=* node index.js",
-		"build": "webpack --config views/app/webpack.config.js",
 		"pub": "np"
 	},
 	"engines": {
@@ -20,9 +18,17 @@
 		"type": "git",
 		"url": "https://github.com/ff0000-ad-tech/debug.git"
 	},
-	"keywords": ["debug", "log", "debugger"],
+	"keywords": [
+		"debug",
+		"log",
+		"debugger"
+	],
 	"author": "TJ Holowaychuk <tj@vision-media.ca>",
-	"contributors": ["Nathan Rajlich <nathan@tootallnate.net> (http://n8.io)", "Andrew Rhyne <rhyneandrew@gmail.com>"],
+	"contributors": [
+		"Nathan Rajlich <nathan@tootallnate.net> (http://n8.io)",
+		"Andrew Rhyne <rhyneandrew@gmail.com>",
+		"Greg Connell <greg.connell@wearered.com>"
+	],
 	"license": "MIT",
 	"dependencies": {
 		"escape-string-regexp": "^1.0.5",
